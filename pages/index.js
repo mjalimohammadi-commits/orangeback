@@ -22,8 +22,7 @@ export default function Home({ products }) {
           Shop on Amazon, Earn Cashback with OrangeBack
         </h1>
         <p className="text-lg mb-8 max-w-2xl mx-auto">
-          Get up to <span className="font-bold">50% cashback</span> on your Amazon purchases.
-          Sign up today and start saving.
+          Get up to <span className="font-bold">50% cashback</span> on your Amazon purchases. Sign up today and start saving.
         </p>
         <Link
           href="/signup"
@@ -46,10 +45,7 @@ export default function Home({ products }) {
               const cashbackNum = toNumber(product.cashback);
 
               return (
-                <div
-                  key={product.id}
-                  className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
-                >
+                <div key={product.id} className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
                   <div className="w-full h-56 relative rounded-lg overflow-hidden bg-gray-100">
                     <Image
                       src={product.image}
@@ -88,14 +84,20 @@ export default function Home({ products }) {
   );
 }
 
-// ✅ SSR → سازگار با Vercel و لوکال
-export async function getServerSideProps({ req }) {
-  const protocol = req.headers["x-forwarded-proto"] || "http";
-  const host = req.headers.host;
-  const baseUrl = `${protocol}://${host}`;
+// ✅ SSR سازگار با Vercel
+export async function getServerSideProps(context) {
+  const req = context.req;
+
+  // ساختن URL صحیح برای SSR در Vercel
+  const protocol =
+    req.headers["x-forwarded-proto"] ||
+    (req.headers.host.includes("localhost") ? "http" : "https");
+
+  const baseUrl = `${protocol}://${req.headers.host}`;
 
   try {
     const res = await fetch(`${baseUrl}/api/products`);
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
     const productsRaw = await res.json();
 
     const normalizeImagePath = (img) => {
@@ -111,14 +113,8 @@ export async function getServerSideProps({ req }) {
           id: p.id,
           name: p.name || "Unnamed Product",
           image: normalizeImagePath(p.image),
-          price:
-            typeof p.price === "number"
-              ? p.price
-              : parseFloat(String(p.price).replace(/[^\d.-]+/g, "")) || null,
-          cashback:
-            typeof p.cashback === "number"
-              ? p.cashback
-              : parseFloat(String(p.cashback).replace(/[^\d.-]+/g, "")) || null,
+          price: parseFloat(p.price) || 0,
+          cashback: parseFloat(p.cashback) || 0,
         }))
       : [];
 
