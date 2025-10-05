@@ -3,22 +3,24 @@ import Image from "next/image";
 import { useState } from "react";
 
 export default function ProductPage({ product }) {
+  // ✅ useState باید همیشه در ابتدای تابع باشد
+  const [imgSrc, setImgSrc] = useState(
+    product?.image && product.image.trim() !== ""
+      ? product.image
+      : "/images/placeholder.png"
+  );
+
   if (!product) {
     return (
       <Layout title="Product Not Found">
         <section className="py-16 text-center">
-          <h1 className="text-3xl font-bold text-gray-700">Product not found</h1>
+          <h1 className="text-3xl font-bold text-gray-700">
+            Product not found
+          </h1>
         </section>
       </Layout>
     );
   }
-
-  // ✅ حالت امن برای تصویر محصول (با fallback)
-  const [imgSrc, setImgSrc] = useState(
-    product.image && product.image.trim() !== ""
-      ? product.image
-      : "/images/placeholder.png"
-  );
 
   const productPrice =
     typeof product.price === "number"
@@ -60,19 +62,20 @@ export default function ProductPage({ product }) {
           </p>
 
           <button
-            onClick={() => {
+            onClick={() =>
               window.open(
                 product.amazonLink || "https://www.amazon.com",
                 "_blank"
-              );
-            }}
+              )
+            }
             className="bg-orange-600 text-white px-6 py-3 rounded-xl shadow hover:bg-orange-700 transition"
           >
             Shop with Cashback
           </button>
 
           <p className="mt-6 text-gray-500 text-sm">
-            Cashback will be added to your account once your order is confirmed by Amazon.
+            Cashback will be added to your account once your order is confirmed by
+            Amazon.
           </p>
         </div>
       </section>
@@ -86,32 +89,20 @@ export async function getServerSideProps({ params }) {
     const res = await fetch("http://localhost:3000/api/products");
     const productsRaw = await res.json();
 
-    // تابع اصلاح مسیر تصویر برای جلوگیری از ارورهای 404 در Vercel
     const normalizeImagePath = (img) => {
       if (!img || typeof img !== "string" || img.trim() === "") {
         return "/images/placeholder.png";
       }
-
       if (img.startsWith("http")) return img;
-
-      // اگر مسیر نسبی مثل "product1.jpg" بود → بفرست داخل /images/
       if (!img.startsWith("/")) return `/images/${img}`;
-
-      // اگر از /images شروع میشه، خودش درسته
       if (img.startsWith("/images")) return img;
-
-      // هر چیز دیگه → placeholder
       return "/images/placeholder.png";
     };
 
     const product = productsRaw.find((p) => p.id.toString() === params.id);
 
-    // اگه محصول وجود نداشت
-    if (!product) {
-      return { props: { product: null } };
-    }
+    if (!product) return { props: { product: null } };
 
-    // اصلاح مسیر تصویر و داده‌ها
     const normalizedProduct = {
       ...product,
       image: normalizeImagePath(product.image),
