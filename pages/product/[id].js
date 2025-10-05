@@ -82,15 +82,22 @@ export default function ProductPage({ product }) {
   );
 }
 
-// ✅ SSR → دریافت دیتای محصول از API (سازگار با Vercel و لوکال)
-export async function getServerSideProps({ params }) {
-  const baseUrl =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
+// ✅ SSR سازگار با Vercel (حل کامل خطای Unexpected token '<')
+export async function getServerSideProps(context) {
+  const req = context.req;
+  const { params } = context;
+
+  // ساختن URL صحیح برای هر محیط (Vercel / local)
+  const protocol =
+    req.headers["x-forwarded-proto"] ||
+    (req.headers.host.includes("localhost") ? "http" : "https");
+
+  const baseUrl = `${protocol}://${req.headers.host}`;
 
   try {
     const res = await fetch(`${baseUrl}/api/products`);
+    if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
+
     const productsRaw = await res.json();
 
     const normalizeImagePath = (img) => {
@@ -98,12 +105,14 @@ export async function getServerSideProps({ params }) {
         return "/images/placeholder.png";
       }
       if (img.startsWith("http")) return img;
-      if (img.startsWith("/product")) return `/images${img}`; // 👈 مهم
       if (img.startsWith("/images")) return img;
+      if (img.startsWith("/product")) return `/images${img}`;
       return "/images/placeholder.png";
     };
 
-    const product = productsRaw.find((p) => p.id.toString() === params.id);
+    const product = Array.isArray(productsRaw)
+      ? productsRaw.find((p) => p.id.toString() === params.id)
+      : null;
 
     if (!product) return { props: { product: null } };
 
