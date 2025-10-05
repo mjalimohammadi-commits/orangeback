@@ -1,4 +1,3 @@
-// pages/index.js
 import Layout from "../components/Layout";
 import Link from "next/link";
 import Image from "next/image";
@@ -35,10 +34,14 @@ export default function Home({ products }) {
 
       {/* Product Grid */}
       <section className="py-16 px-6 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-8 text-gray-800">Featured Products</h2>
+        <h2 className="text-2xl font-bold mb-8 text-gray-800">
+          Featured Products
+        </h2>
 
         {(!products || products.length === 0) ? (
-          <p className="text-gray-500 text-center">No products available right now.</p>
+          <p className="text-gray-500 text-center">
+            No products available right now.
+          </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {products.map((product) => {
@@ -69,7 +72,8 @@ export default function Home({ products }) {
                   </p>
 
                   <span className="inline-block mt-2 px-3 py-1 text-sm bg-orange-100 text-orange-600 rounded-full">
-                    Cashback: €{cashbackNum !== null ? cashbackNum.toFixed(2) : "0.00"}
+                    Cashback: €
+                    {cashbackNum !== null ? cashbackNum.toFixed(2) : "0.00"}
                   </span>
 
                   <Link
@@ -89,11 +93,10 @@ export default function Home({ products }) {
 }
 
 // ✅ SSR → گرفتن دیتا از API (سازگار با Vercel و لوکال)
-export async function getServerSideProps() {
-  const baseUrl =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
+export async function getServerSideProps(context) {
+  const protocol = process.env.VERCEL ? "https" : "http";
+  const host = process.env.VERCEL_URL || context.req.headers.host;
+  const baseUrl = `${protocol}://${host}`;
 
   try {
     const res = await fetch(`${baseUrl}/api/products`);

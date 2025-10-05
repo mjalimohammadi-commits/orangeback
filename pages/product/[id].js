@@ -34,7 +34,7 @@ export default function ProductPage({ product }) {
   return (
     <Layout title={`OrangeBack | ${product.name}`}>
       <section className="py-16 px-6 max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
-        {/* ✅ Product Image */}
+        {/* Product Image */}
         <div className="flex justify-center items-center bg-gray-50 rounded-xl shadow-inner p-6 relative w-full h-[300px] md:h-[400px]">
           <Image
             src={imgSrc}
@@ -46,7 +46,7 @@ export default function ProductPage({ product }) {
           />
         </div>
 
-        {/* ✅ Product Info */}
+        {/* Product Info */}
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-4">
             {product.name || "Unnamed Product"}
@@ -73,8 +73,8 @@ export default function ProductPage({ product }) {
           </button>
 
           <p className="mt-6 text-gray-500 text-sm">
-            Cashback will be added to your account once your order is confirmed by
-            Amazon.
+            Cashback will be added to your account once your order is confirmed
+            by Amazon.
           </p>
         </div>
       </section>
@@ -83,11 +83,10 @@ export default function ProductPage({ product }) {
 }
 
 // ✅ SSR → دریافت دیتای محصول از API (سازگار با Vercel و لوکال)
-export async function getServerSideProps({ params }) {
-  const baseUrl =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
+export async function getServerSideProps({ params, req }) {
+  const protocol = process.env.VERCEL ? "https" : "http";
+  const host = process.env.VERCEL_URL || req.headers.host;
+  const baseUrl = `${protocol}://${host}`;
 
   try {
     const res = await fetch(`${baseUrl}/api/products`);
