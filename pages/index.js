@@ -88,27 +88,24 @@ export default function Home({ products }) {
   );
 }
 
-// ✅ SSR → گرفتن دیتا از API و اصلاح مسیر تصاویر برای جلوگیری از 404
+// ✅ SSR → گرفتن دیتا از API (سازگار با Vercel و لوکال)
 export async function getServerSideProps() {
+  const baseUrl =
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+
   try {
-    const res = await fetch("http://localhost:3000/api/products");
+    const res = await fetch(`${baseUrl}/api/products`);
     const productsRaw = await res.json();
 
     const normalizeImagePath = (img) => {
       if (!img || typeof img !== "string" || img.trim() === "") {
         return "/images/placeholder.png";
       }
-
-      // اگر URL کامل بود، همان را نگه‌دار
       if (img.startsWith("http")) return img;
-
-      // اگر مسیر نسبی بدون / بود (مثلاً product1.jpg) → درستش کن
       if (!img.startsWith("/")) return `/images/${img}`;
-
-      // اگر مسیر با /images شروع می‌شود → همان را نگه‌دار
       if (img.startsWith("/images")) return img;
-
-      // در غیر این صورت → مسیر پیش‌فرض
       return "/images/placeholder.png";
     };
 

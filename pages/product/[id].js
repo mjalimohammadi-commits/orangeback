@@ -3,7 +3,6 @@ import Image from "next/image";
 import { useState } from "react";
 
 export default function ProductPage({ product }) {
-  // ✅ useState باید همیشه در ابتدای تابع باشد
   const [imgSrc, setImgSrc] = useState(
     product?.image && product.image.trim() !== ""
       ? product.image
@@ -83,10 +82,15 @@ export default function ProductPage({ product }) {
   );
 }
 
-// ✅ SSR → دریافت دیتای محصول از API و اصلاح مسیر تصویر
+// ✅ SSR → دریافت دیتای محصول از API (سازگار با Vercel و لوکال)
 export async function getServerSideProps({ params }) {
+  const baseUrl =
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+
   try {
-    const res = await fetch("http://localhost:3000/api/products");
+    const res = await fetch(`${baseUrl}/api/products`);
     const productsRaw = await res.json();
 
     const normalizeImagePath = (img) => {
