@@ -22,8 +22,8 @@ export default function Home({ products }) {
           Shop on Amazon, Earn Cashback with OrangeBack
         </h1>
         <p className="text-lg mb-8 max-w-2xl mx-auto">
-          Get up to <span className="font-bold">50% cashback</span> on your
-          Amazon purchases. Sign up today and start saving.
+          Get up to <span className="font-bold">50% cashback</span> on your Amazon purchases.
+          Sign up today and start saving.
         </p>
         <Link
           href="/signup"
@@ -37,7 +37,7 @@ export default function Home({ products }) {
       <section className="py-16 px-6 max-w-6xl mx-auto">
         <h2 className="text-2xl font-bold mb-8 text-gray-800">Featured Products</h2>
 
-        {(!products || products.length === 0) ? (
+        {!products || products.length === 0 ? (
           <p className="text-gray-500 text-center">No products available right now.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -88,24 +88,20 @@ export default function Home({ products }) {
   );
 }
 
-// ✅ SSR → گرفتن دیتا از API (سازگار با Vercel و لوکال)
-export async function getServerSideProps() {
-  const baseUrl =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
+// ✅ SSR → سازگار با Vercel و لوکال
+export async function getServerSideProps({ req }) {
+  const protocol = req.headers["x-forwarded-proto"] || "http";
+  const host = req.headers.host;
+  const baseUrl = `${protocol}://${host}`;
 
   try {
     const res = await fetch(`${baseUrl}/api/products`);
     const productsRaw = await res.json();
 
-    // مسیر تصویر را اصلاح می‌کند تا در Vercel درست کار کند
     const normalizeImagePath = (img) => {
-      if (!img || typeof img !== "string" || img.trim() === "") {
-        return "/images/placeholder.png";
-      }
+      if (!img || typeof img !== "string" || img.trim() === "") return "/images/placeholder.png";
       if (img.startsWith("http")) return img;
-      if (img.startsWith("/product")) return `/images${img}`; // 👈 مهم
+      if (!img.startsWith("/")) return `/images/${img}`;
       if (img.startsWith("/images")) return img;
       return "/images/placeholder.png";
     };
