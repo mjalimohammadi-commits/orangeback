@@ -8,16 +8,18 @@ export default function Layout({ children, title = "OrangeBack" }) {
   const [mockSession, setMockSession] = useState(null);
 
   useEffect(() => {
-    const storedSession = localStorage.getItem("mockSession");
-    if (storedSession) {
-      setMockSession(JSON.parse(storedSession));
+    if (typeof window !== "undefined") {
+      const storedSession = localStorage.getItem("mockSession");
+      if (storedSession) {
+        setMockSession(JSON.parse(storedSession));
+      }
     }
   }, []);
 
   const handleMockLogout = () => {
     localStorage.removeItem("mockSession");
     setMockSession(null);
-    window.location.href = "/"; // برگشت به صفحه اصلی
+    window.location.href = "/";
   };
 
   const isLoggedIn = session || mockSession;
@@ -35,7 +37,6 @@ export default function Layout({ children, title = "OrangeBack" }) {
         <meta property="og:type" content="website" />
       </Head>
 
-      {/* Header */}
       <header className="flex justify-between items-center px-6 py-4 bg-white shadow-md">
         <Link href="/" className="text-2xl font-bold text-orange-600">
           OrangeBack
@@ -72,10 +73,8 @@ export default function Layout({ children, title = "OrangeBack" }) {
         </nav>
       </header>
 
-      {/* Main */}
       <main className="min-h-screen bg-gray-50">{children}</main>
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white text-center py-6 mt-10">
         <p>© {new Date().getFullYear()} OrangeBack. All rights reserved.</p>
       </footer>

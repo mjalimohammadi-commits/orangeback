@@ -31,7 +31,6 @@ export default function Login() {
         <title>Login | OrangeBack</title>
       </Head>
 
-      {/* Header */}
       <header className="flex justify-between items-center px-6 py-4 bg-white shadow-md">
         <Link href="/" className="text-2xl font-bold text-orange-600">
           OrangeBack
@@ -42,7 +41,6 @@ export default function Login() {
         </nav>
       </header>
 
-      {/* Login Form */}
       <main className="flex items-center justify-center min-h-screen bg-gray-50 px-6">
         <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
@@ -92,7 +90,6 @@ export default function Login() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white text-center py-6 mt-10">
         <p>© {new Date().getFullYear()} OrangeBack. All rights reserved.</p>
       </footer>

@@ -1,5 +1,5 @@
 import { signIn } from "next-auth/react";
-import Layout from "../../components/Layout";
+import Layout from "@/components/Layout";
 import { useState } from "react";
 
 export default function Login() {
@@ -19,6 +19,7 @@ export default function Login() {
     <Layout title="Login | OrangeBack">
       <section className="flex flex-col items-center justify-center py-16">
         <h1 className="text-3xl font-bold mb-6">Login</h1>
+
         <form
           onSubmit={handleLogin}
           className="bg-white shadow rounded-xl p-6 w-full max-w-sm"
