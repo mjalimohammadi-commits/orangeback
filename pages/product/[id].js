@@ -84,21 +84,19 @@ export default function ProductPage({ product }) {
 }
 
 // ✅ SSR → Fetch product data (works both locally and on Vercel)
-export async function getServerSideProps(context) {
-  const req = context.req;
-  const { params } = context;
-
-  // ساخت URL دقیق برای هر محیط
-  const host =
-    req.headers.host || process.env.VERCEL_URL || "localhost:3000";
-  const protocol =
-    req.headers["x-forwarded-proto"] ||
-    (host.includes("localhost") ? "http" : "https");
-  const baseUrl = `${protocol}://${host}`;
-
+export async function getServerSideProps({ params }) {
   try {
+    // ✅ URL ثابت برای Vercel و Local
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      (process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000");
+
     const res = await fetch(`${baseUrl}/api/products`);
-    if (!res.ok) throw new Error(`Failed to fetch products: ${res.status}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch products: ${res.status}`);
+    }
 
     const productsRaw = await res.json();
 
@@ -109,7 +107,7 @@ export async function getServerSideProps(context) {
       if (img.startsWith("http")) return img;
       if (img.startsWith("/images")) return img;
       if (img.startsWith("/product")) return `/images${img}`;
-      return `/images/${img}`;
+      return "/images/placeholder.png";
     };
 
     const product = Array.isArray(productsRaw)
