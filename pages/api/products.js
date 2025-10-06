@@ -1,13 +1,15 @@
 // pages/api/products.js
 
 export default function handler(req, res) {
-  // مسیر پایه بر اساس محیط
-  const baseUrl =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
+  // ساخت مسیر درست برای تصاویر بر اساس محیط
+  const host =
+    req.headers.host || process.env.VERCEL_URL || "localhost:3000";
+  const protocol =
+    req.headers["x-forwarded-proto"] ||
+    (host.includes("localhost") ? "http" : "https");
+  const baseUrl = `${protocol}://${host}`;
 
-  // ✅ داده‌های محصولات با مسیر تصویر اصلاح‌شده
+  // ✅ داده‌ها
   const products = [
     {
       id: 1,

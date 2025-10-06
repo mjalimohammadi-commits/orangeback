@@ -1,3 +1,4 @@
+// pages/product/[id].js
 import Layout from "../../components/Layout";
 import Image from "next/image";
 import { useState } from "react";
@@ -82,17 +83,18 @@ export default function ProductPage({ product }) {
   );
 }
 
-// ✅ SSR سازگار با Vercel (حل کامل خطای Unexpected token '<')
+// ✅ SSR → Fetch product data (works both locally and on Vercel)
 export async function getServerSideProps(context) {
   const req = context.req;
   const { params } = context;
 
-  // ساختن URL صحیح برای هر محیط (Vercel / local)
+  // ساخت URL دقیق برای هر محیط
+  const host =
+    req.headers.host || process.env.VERCEL_URL || "localhost:3000";
   const protocol =
     req.headers["x-forwarded-proto"] ||
-    (req.headers.host.includes("localhost") ? "http" : "https");
-
-  const baseUrl = `${protocol}://${req.headers.host}`;
+    (host.includes("localhost") ? "http" : "https");
+  const baseUrl = `${protocol}://${host}`;
 
   try {
     const res = await fetch(`${baseUrl}/api/products`);
@@ -107,7 +109,7 @@ export async function getServerSideProps(context) {
       if (img.startsWith("http")) return img;
       if (img.startsWith("/images")) return img;
       if (img.startsWith("/product")) return `/images${img}`;
-      return "/images/placeholder.png";
+      return `/images/${img}`;
     };
 
     const product = Array.isArray(productsRaw)
