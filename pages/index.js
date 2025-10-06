@@ -16,14 +16,13 @@ function toNumber(value) {
 export default function Home({ products }) {
   return (
     <Layout title="OrangeBack | Amazon Cashback">
-      {/* ✅ Hero Section */}
+      {/* Hero Section */}
       <section className="bg-gradient-to-r from-orange-500 to-orange-700 text-white text-center py-20 px-6">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">
           Shop on Amazon, Earn Cashback with OrangeBack
         </h1>
         <p className="text-lg mb-8 max-w-2xl mx-auto">
-          Get up to <span className="font-bold">50% cashback</span> on your Amazon
-          purchases. Sign up today and start saving.
+          Get up to <span className="font-bold">50% cashback</span> on your Amazon purchases. Sign up today and start saving.
         </p>
         <Link
           href="/signup"
@@ -33,11 +32,9 @@ export default function Home({ products }) {
         </Link>
       </section>
 
-      {/* ✅ Product Grid */}
+      {/* Product Grid */}
       <section className="py-16 px-6 max-w-6xl mx-auto">
-        <h2 className="text-2xl font-bold mb-8 text-gray-800">
-          Featured Products
-        </h2>
+        <h2 className="text-2xl font-bold mb-8 text-gray-800">Featured Products</h2>
 
         {!products || products.length === 0 ? (
           <p className="text-gray-500 text-center">
@@ -73,8 +70,7 @@ export default function Home({ products }) {
                   </p>
 
                   <span className="inline-block mt-2 px-3 py-1 text-sm bg-orange-100 text-orange-600 rounded-full">
-                    Cashback: €
-                    {cashbackNum !== null ? cashbackNum.toFixed(2) : "0.00"}
+                    Cashback: €{cashbackNum !== null ? cashbackNum.toFixed(2) : "0.00"}
                   </span>
 
                   <Link
@@ -93,24 +89,20 @@ export default function Home({ products }) {
   );
 }
 
-// ✅ SSR → Fetch products dynamically (works both locally and on Vercel)
-export async function getServerSideProps(context) {
-  const req = context.req;
-
-  // ساختن URL دقیق و امن برای SSR
-  const protocol =
-    req.headers["x-forwarded-proto"] ||
-    (req.headers.host.includes("localhost") ? "http" : "https");
-  const baseUrl = `${protocol}://${req.headers.host}`;
-
+// ✅ SSR that works on Vercel and locally — no more JSON errors
+export async function getServerSideProps() {
   try {
-    const res = await fetch(`${baseUrl}/api/products`);
+    // 🔹 از relative URL استفاده کن تا Next.js خودش مسیر API داخلی را بفهمد
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/products`, {
+      headers: { "Content-Type": "application/json" },
+    });
+
     if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+
     const productsRaw = await res.json();
 
     const normalizeImagePath = (img) => {
-      if (!img || typeof img !== "string" || img.trim() === "")
-        return "/images/placeholder.png";
+      if (!img || typeof img !== "string" || img.trim() === "") return "/images/placeholder.png";
       if (img.startsWith("http")) return img;
       if (img.startsWith("/images")) return img;
       if (img.startsWith("/product")) return `/images${img}`;
@@ -122,14 +114,8 @@ export async function getServerSideProps(context) {
           id: p.id,
           name: p.name || "Unnamed Product",
           image: normalizeImagePath(p.image),
-          price:
-            typeof p.price === "number"
-              ? p.price
-              : parseFloat(String(p.price).replace(/[^\d.-]+/g, "")) || null,
-          cashback:
-            typeof p.cashback === "number"
-              ? p.cashback
-              : parseFloat(String(p.cashback).replace(/[^\d.-]+/g, "")) || null,
+          price: parseFloat(p.price) || 0,
+          cashback: parseFloat(p.cashback) || 0,
         }))
       : [];
 
